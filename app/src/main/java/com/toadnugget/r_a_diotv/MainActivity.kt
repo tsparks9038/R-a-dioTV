@@ -25,11 +25,14 @@ import org.chromium.net.CronetEngine
 import org.chromium.net.CronetException
 import org.chromium.net.UrlRequest
 import org.chromium.net.UrlResponseInfo
+import org.json.JSONArray
+import org.json.JSONObject
 import java.nio.ByteBuffer
 import java.nio.charset.Charset
 import java.util.concurrent.Executor
 import java.util.concurrent.Executors
 
+//comment for git
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -55,16 +58,40 @@ class MainActivity : ComponentActivity() {
                     shape = RectangleShape
                 ) {
                     var responseText by remember { mutableStateOf("") }
+                    var main by remember { mutableStateOf<JSONObject?>(null) }
+                    var dj by remember { mutableStateOf<JSONObject?>(null) }
+                    var queue by remember { mutableStateOf<JSONArray?>(null) }
+                    var lp by remember { mutableStateOf<JSONArray?>(null) }
 
                     // Update responseText on the main thread
                     LaunchedEffect(callback) {
                         callback.responseBodyFlow.collect { newResponseText ->
                             responseText = newResponseText
                             Log.d("MainActivity", "responseText updated: $responseText")
+
+                            if (responseText.isNotEmpty()) {
+                                try {
+                                    val jObject = JSONObject(responseText)
+                                    main = jObject.getJSONObject("main")
+                                    dj = main?.getJSONObject("dj")
+                                    queue = main?.getJSONArray("queue")
+                                    lp = main?.getJSONArray("lp")
+                                } catch (e: Exception) {
+                                    Log.e("MainActivity", "Error parsing JSON: ${e.message}")
+                                }
+                            }
                         }
                     }
 
-                    Text(text = responseText)
+                    if (main != null && dj != null && queue != null && lp != null) {
+                        Text(text = main!!.getString("np"))
+                        Text(text = dj!!.getString("djname"))
+                        Text(text = queue!!.getJSONObject(0).getString("meta"))
+                        Text(text = lp!!.getJSONObject(0).getString("meta"))
+                        Text(text = main!!.getString("tags"))
+                    } else {
+                        Text(text = "Loading...")
+                    }
                 }
             }
         }
@@ -109,6 +136,7 @@ class MyCallback : UrlRequest.Callback() {
         info: UrlResponseInfo
     ) {
         val responseText = responseBody.toString()
+
         CoroutineScope(Dispatchers.Main).launch {
             _responseBodyFlow.value = responseText
             Log.d("MyCallback", "Response: $responseText")
@@ -120,6 +148,9 @@ class MyCallback : UrlRequest.Callback() {
         info: UrlResponseInfo?,
         error: CronetException?
     ) {
-        TODO("Not yet implemented")
+        CoroutineScope(Dispatchers.Main).launch {
+            _responseBodyFlow.value = ""
+            Log.e("MyCallback", "Request failed: ${error?.message}")
+        }
     }
 }
