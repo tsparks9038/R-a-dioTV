@@ -4,6 +4,7 @@ import android.os.Bundle
 import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
@@ -13,6 +14,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.tv.material3.Surface
@@ -93,10 +95,17 @@ class MainActivity : ComponentActivity() {
                             main!!.getInt("listeners"),
                             main!!.getLong("current"),
                             main!!.getLong("start_time"),
-                            main!!.getLong("end_time"),
+                            main!!.getLong("end_time")
+                        )
+                        Dj(
                             dj!!.getString("djname"),
                             "https://r-a-d.io/api/dj-image/" + dj!!.getString("djimage")
                         )
+
+                        for (i in 0 until lp!!.length()) {
+                            val song = lp!!.getJSONObject(i)
+                            Lp(song)
+                        }
 //                        Column {
 //                            Text("<h1>${main!!.getString("np")}</h1>") // Current song
 //                            Text("<p>Listeners: ${main!!.getString("listeners")}</p>") // Listeners
@@ -197,26 +206,44 @@ class MyCallback : UrlRequest.Callback() {
 }
 
 @Composable
-fun Main(np: String, listeners: Int, current: Long, start_time: Long, end_time: Long, djname: String, djimage: String) {
-    Column {
+fun Main(np: String, listeners: Int, current: Long, start_time: Long, end_time: Long) {
+    Column(
+        modifier = Modifier.fillMaxSize(),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
         Text(np) // Current song
 
         Row {
             Text("Listeners: $listeners") // Listeners
 
             val time = current - start_time
+            val end = end_time - start_time
 
-            Text("$time / $end_time")
+            Text("$time / $end")
         }
-
-        Dj(djname, djimage)
     }
 }
 
 @Composable
 fun Dj(djname: String, djimage: String) {
-    Column {
+    Column(
+        modifier = Modifier.fillMaxSize(),
+        horizontalAlignment = Alignment.End
+    ) {
         AsyncImage(model = djimage, contentDescription = null)
         Text(djname) // DJ
+    }
+}
+
+@Composable
+fun Lp(song: JSONObject) {
+    Column (
+        modifier = Modifier.fillMaxSize(),
+        verticalArrangement = Arrangement.Center
+    ) {
+        val meta = song.getString("meta")
+        val time = song.getString("timestamp")
+
+        Text("$meta - $time")
     }
 }
