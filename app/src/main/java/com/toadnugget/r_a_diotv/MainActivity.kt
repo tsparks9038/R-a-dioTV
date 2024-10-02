@@ -1,13 +1,19 @@
 package com.toadnugget.r_a_diotv
 
+import android.annotation.SuppressLint
 import android.os.Bundle
 import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -17,6 +23,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.RectangleShape
+import androidx.compose.ui.unit.dp
 import androidx.tv.material3.Surface
 import androidx.tv.material3.Text
 import coil.compose.AsyncImage
@@ -102,10 +109,19 @@ class MainActivity : ComponentActivity() {
                             "https://r-a-d.io/api/dj-image/" + dj!!.getString("djimage")
                         )
 
-                        for (i in 0 until lp!!.length()) {
-                            val song = lp!!.getJSONObject(i)
-                            Lp(song)
-                        }
+                        Lp(lp!!, main!!.getLong("current"))
+                        Queue(queue!!, main!!.getLong("current"))
+
+//                        for (i in 0 until lp!!.length()) {
+//                            val song = lp!!.getJSONObject(i)
+//                            Spacer(modifier = Modifier.size(50.dp))
+//                            Lp(song, main!!.getLong("current"))
+//                        }
+
+//                        for (i in 0 until queue!!.length()) {
+//                            val song = queue!!.getJSONObject(i)
+//                            Queue(song, main!!.getLong("current"))
+//                        }
 //                        Column {
 //                            Text("<h1>${main!!.getString("np")}</h1>") // Current song
 //                            Text("<p>Listeners: ${main!!.getString("listeners")}</p>") // Listeners
@@ -205,6 +221,7 @@ class MyCallback : UrlRequest.Callback() {
     }
 }
 
+@SuppressLint("DefaultLocale")
 @Composable
 fun Main(np: String, listeners: Int, current: Long, start_time: Long, end_time: Long) {
     Column(
@@ -214,12 +231,14 @@ fun Main(np: String, listeners: Int, current: Long, start_time: Long, end_time: 
         Text(np) // Current song
 
         Row {
-            Text("Listeners: $listeners") // Listeners
-
             val time = current - start_time
             val end = end_time - start_time
+            val timeStr = String.format("%02d:%02d", time / 60, time % 60)
+            val endStr = String.format("%02d:%02d", end / 60, end % 60)
 
-            Text("$time / $end")
+            Text("Listeners: $listeners") // Listeners
+            Spacer(modifier = Modifier.size(50.dp))
+            Text("$timeStr / $endStr")
         }
     }
 }
@@ -230,20 +249,59 @@ fun Dj(djname: String, djimage: String) {
         modifier = Modifier.fillMaxSize(),
         horizontalAlignment = Alignment.End
     ) {
-        AsyncImage(model = djimage, contentDescription = null)
+        AsyncImage(model = djimage, contentDescription = null, modifier = Modifier.size(180.dp))
         Text(djname) // DJ
     }
 }
 
+@SuppressLint("DefaultLocale")
 @Composable
-fun Lp(song: JSONObject) {
-    Column (
+fun Lp(lp: JSONArray, current: Long) {
+    Box(
         modifier = Modifier.fillMaxSize(),
-        verticalArrangement = Arrangement.Center
+        contentAlignment = Alignment.BottomStart // Align content to the bottom start
     ) {
-        val meta = song.getString("meta")
-        val time = song.getString("timestamp")
+        Column (
+            modifier = Modifier
+                .fillMaxWidth(0.5f)
+                .wrapContentWidth(align = Alignment.Start),
+            verticalArrangement = Arrangement.Center
+        ) {
+            for (i in 0 until lp.length()) {
+                val song = lp.getJSONObject(i)
+                val meta = song.getString("meta")
+                val time = current - song.getLong("timestamp")
+                val timeStr = String.format("%02d:%02d", time / 60, time % 60)
 
-        Text("$meta - $time")
+                Text("$meta - $timeStr ago")
+                Spacer(modifier = Modifier.size(25.dp))
+            }
+        }
+    }
+}
+
+@SuppressLint("DefaultLocale")
+@Composable
+fun Queue(queue: JSONArray, current: Long) {
+    Box(
+        modifier = Modifier.fillMaxSize(),
+        contentAlignment = Alignment.BottomEnd // Align content to the bottom start
+    ) {
+        Column (
+            modifier = Modifier
+                .fillMaxWidth(0.5f)
+                .wrapContentWidth(align = Alignment.End),
+            verticalArrangement = Arrangement.Center
+        ) {
+            for (i in 0 until queue.length()) {
+                val song = queue.getJSONObject(i)
+                val meta = song.getString("meta")
+                val time = song.getLong("timestamp") - current
+                val timeStr = String.format("%02d:%02d", time / 60, time % 60)
+
+                Text("$meta - in $timeStr")
+                Spacer(modifier = Modifier.size(25.dp))
+            }
+        }
     }
 }
