@@ -305,5 +305,3 @@ fun Queue(queue: JSONArray, current: Long) {
         }
     }
 }
-
-//test
