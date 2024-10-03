@@ -111,45 +111,6 @@ class MainActivity : ComponentActivity() {
 
                         Lp(lp!!, main!!.getLong("current"))
                         Queue(queue!!, main!!.getLong("current"))
-
-//                        for (i in 0 until lp!!.length()) {
-//                            val song = lp!!.getJSONObject(i)
-//                            Spacer(modifier = Modifier.size(50.dp))
-//                            Lp(song, main!!.getLong("current"))
-//                        }
-
-//                        for (i in 0 until queue!!.length()) {
-//                            val song = queue!!.getJSONObject(i)
-//                            Queue(song, main!!.getLong("current"))
-//                        }
-//                        Column {
-//                            Text("<h1>${main!!.getString("np")}</h1>") // Current song
-//                            Text("<p>Listeners: ${main!!.getString("listeners")}</p>") // Listeners
-//                            Text("<h2>DJ: ${dj!!.getString("djname")}</h2>") // DJ
-//                            Text("<img src=\"${dj!!.getString("djimage")}\" alt=\"DJ Image\">") // DJ image (may need adjustments for Compose)
-//                            Text("<h3>Last Played</h3>")
-//
-//                            val lpList = (0 until lp!!.length()).map {
-//                                i -> lp!!.getJSONObject(i)
-//                            }
-//                            lpList.forEach { song ->
-//                                val meta = song.getString("meta")
-//                                val time = song.getString("time")
-//                                Text("<li>$meta - $time</li>")
-//                            }
-//
-//                            Text("<h3>Queue</h3>")
-//
-//                            val queueList = (0 until queue!!.length()).map {
-//                                i -> queue!!.getJSONObject(i)
-//                            }
-//
-//                            queueList.forEach { song ->
-//                                val meta = song.getString("meta")
-//                                val time = song.getString("time")
-//                                Text("<li>$meta - $time</li>")
-//                            }
-//                        }
                     } else {
                         Text(text = "Loading...")
                     }
